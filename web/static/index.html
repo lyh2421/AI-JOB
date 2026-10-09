@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CareerPilot-CN Web - AI 求职助手">
+  <title>CareerPilot · AI 求职助手</title>
+  <link rel="stylesheet" href="/css/app.css">
+  <link rel="stylesheet" href="/css/resume-editor.css">
+  <link rel="icon" href="data:,">
+</head>
+<body>
+  <!-- 登录 / 注册 -->
+  <div class="auth-screen" id="authScreen">
+    <div class="auth-card">
+      <div class="auth-brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2a10 10 0 0 1 10 10c0 5-4 8-10 8S2 17 2 12 7 2 12 2Z"></path>
+            <path d="M8 13.5c1.2 1.2 6.8 1.2 8 0-1.2-1.2-6.8-1.2-8 0Z"></path>
+            <circle cx="9" cy="9.5" r="1"></circle>
+            <circle cx="15" cy="9.5" r="1"></circle>
+          </svg>
+        </div>
+        <h1>CareerPilot</h1>
+        <p>AI 求职助手 · 岗位匹配、简历定制、面试准备</p>
+      </div>
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tabLogin">登录</button>
+        <button class="auth-tab" id="tabRegister">注册</button>
+      </div>
+
+      <form class="auth-form" id="loginForm">
+<label class="field"><span>用户名或邮箱</span><input id="loginUsername" type="text" autocomplete="username" placeholder="输入用户名或邮箱"></label>
+        <label class="field"><span>密码</span><input id="loginPassword" type="password" autocomplete="current-password" placeholder="输入密码"></label>
+        <label class="field"><span><input id="rememberMe" type="checkbox" checked> 记住我 30 天</span></label>
+        <button class="btn btn-primary btn-block" type="submit">登录</button>
+      </form>
+
+      <form class="auth-form hide" id="registerForm">
+        <label class="field"><span>用户名</span><input id="regUsername" type="text" autocomplete="username" placeholder="设置用户名"></label>
+        <label class="field"><span>邮箱（选填）</span><input id="regEmail" type="email" autocomplete="email" placeholder="you@example.com"></label>
+        <label class="field"><span>密码</span><input id="regPassword" type="password" autocomplete="new-password" placeholder="至少 6 位"></label>
+        <button class="btn btn-primary btn-block" type="submit">注册</button>
+      </form>
+
+      <div class="auth-divider"><span>或</span></div>
+      <button class="btn btn-block" id="guestBtn">先体验一下，不注册</button>
+      <p class="auth-hint muted">游客也可以使用全部功能，之后可一键转正保留数据。</p>
+      <p class="auth-hint muted" style="margin-top:6px">数据仅存储在本服务器，可随时在设置中导出或注销账号。</p>
+    </div>
+  </div>
+
+  <!-- 主应用 -->
+  <div id="app" class="app-shell hide">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2a10 10 0 0 1 10 10c0 5-4 8-10 8S2 17 2 12 7 2 12 2Z"></path>
+            <path d="M8 13.5c1.2 1.2 6.8 1.2 8 0-1.2-1.2-6.8-1.2-8 0Z"></path>
+            <circle cx="9" cy="9.5" r="1"></circle>
+            <circle cx="15" cy="9.5" r="1"></circle>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <strong>CareerPilot</strong>
+          <span>AI 求职助手</span>
+        </div>
+      </div>
+
+      <nav class="nav" id="nav">
+        <button class="nav-item active" data-view="dashboard">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"></rect><rect x="14" y="3" width="7" height="5" rx="1.5"></rect><rect x="14" y="12" width="7" height="9" rx="1.5"></rect><rect x="3" y="16" width="7" height="5" rx="1.5"></rect></svg>
+          <span>总览</span><span class="nav-sub">今日该干嘛 · 进展总览</span>
+        </button>
+        <button class="nav-item" data-view="jobs">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+          <span>岗位搜索</span><span class="nav-sub">找真实岗位 · 看匹配度</span>
+          <span class="nav-badge" id="jobsBadge">0</span>
+        </button>
+        <button class="nav-item" data-view="pipeline">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"></path><path d="M4 12h16"></path><path d="M4 18h10"></path></svg>
+          <span>申请进度</span><span class="nav-sub">投了哪些 · 该跟进谁</span>
+          <span class="nav-badge" id="pipelineBadge">0</span>
+        </button>
+        <button class="nav-item" data-view="campus">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 8l10 5 10-5-10-5Z"></path><path d="M6 11v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5"></path><path d="M22 8v6"></path></svg>
+          <span>校招汇总</span><span class="nav-sub">公告 AI 提取 · 截止不遗漏</span>
+        </button>
+        <button class="nav-item" data-view="interview">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 10h8"></path><path d="M8 14h5"></path><rect x="3" y="4" width="18" height="14" rx="2"></rect><path d="m8 21 8-3"></path></svg>
+          <span>面试准备</span><span class="nav-sub">准备包 · AI 模拟面试</span>
+        </button>
+        <button class="nav-item" data-view="profile">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"></path></svg>
+          <span>简历库</span><span class="nav-sub">传简历 · AI 生成 · 模板排版</span>
+        </button>
+        <button class="nav-item hide" data-view="admin">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"></rect><path d="M8 20h8"></path><path d="M12 16v4"></path></svg>
+          <span>运营管理</span>
+        </button>
+        <button class="nav-item" data-view="team">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          <span>团队协作</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <button class="nav-item" id="chatToggle">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.5 7.2L4 21l1.8-5.5A8 8 0 1 1 21 12Z"></path></svg>
+          <span>AI 助手</span>
+        </button>
+        <button class="nav-item" id="settingsToggle">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5h0a1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"></path></svg>
+          <span>设置</span>
+        </button>
+        <div class="mode-pill" id="modePill" title="当前智能模式">
+          <span class="mode-dot"></span>
+          <span id="modeLabel">本地模式</span>
+        </div>
+      </div>
+    </aside>
+
+    <div class="sidebar-scrim hide" id="sidebarScrim"></div>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="icon-btn menu-btn" id="menuBtn" aria-label="打开导航">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16"></path><path d="M4 12h16"></path><path d="M4 17h16"></path></svg>
+        </button>
+        <div class="topbar-title" id="pageTitle">总览</div>
+        <div class="topbar-actions">
+          <button class="btn btn-primary" id="addJobBtn">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+            录入岗位
+          </button>
+          <div class="notif-wrap" id="notifWrap">
+            <button class="icon-btn notif-btn" id="notifToggle" aria-label="通知">
+              <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.7 21a2 2 0 0 1-3.4 0"></path></svg>
+              <span class="notif-badge hide" id="notifBadge">0</span>
+            </button>
+            <div class="notif-dropdown hide" id="notifDropdown">
+              <div class="notif-head"><strong>通知</strong><button class="btn btn-sm" id="notifReadAll">全部已读</button></div>
+              <div class="notif-list" id="notifList"></div>
+            </div>
+          </div>
+          <div class="user-menu" id="userMenu">
+            <button class="user-menu-btn" id="userMenuBtn">
+              <span class="user-avatar" id="userAvatar">U</span>
+              <span id="userName">用户</span>
+              <span class="role-badge" id="userRole">游客</span>
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m6 9 6 6 6-6"></path></svg>
+            </button>
+            <div class="user-dropdown hide" id="userDropdown">
+              <button id="menuProfile">简历库</button>
+              <button id="menuUpgrade" class="hide">转正注册</button>
+              <button id="menuTour">🎓 新手引导</button>
+              <button id="menuLogout">退出登录</button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="profile-banner hide" id="profileBanner">
+        <span>请先到简历库上传简历，才能使用评分和简历生成功能</span>
+        <button class="btn btn-sm" id="profileBannerBtn">去简历库</button>
+      </div>
+
+      <div class="content" id="content"></div>
+    </main>
+
+    <aside class="chat-panel" id="chatPanel">
+      <div class="chat-head">
+        <div>
+          <strong>AI 求职助手</strong>
+          <span id="chatModeLabel">本地智能模式</span>
+        </div>
+        <button class="icon-btn" id="chatClose" aria-label="关闭">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12"></path><path d="M18 6L6 18"></path></svg>
+        </button>
+      </div>
+      <div class="chat-body" id="chatBody"></div>
+      <div class="chat-input-wrap">
+        <div class="chat-suggestions" id="chatSuggestions">
+          <button>帮我找岗位</button>
+          <button>怎么写简历</button>
+          <button>准备面试</button>
+        </div>
+        <div class="chat-input-row">
+          <input id="chatInput" type="text" placeholder="问我任何求职问题…" autocomplete="off">
+          <button class="btn btn-primary send-btn" id="chatSend">发送</button>
+        </div>
+      </div>
+    </aside>
+
+    <div class="modal-overlay" id="settingsModal">
+      <div class="modal">
+        <div class="modal-head">
+          <strong>AI 增强设置</strong>
+          <button class="icon-btn modal-close" data-close="settingsModal" aria-label="关闭">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12"></path><path d="M18 6L6 18"></path></svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p class="muted">开启后可接入 OpenAI 兼容 API（DeepSeek、Ollama、OpenAI 等），用于增强评估报告、简历、求职信与对话。不配置也能使用全部本地功能。</p>
+          <div id="aiStatusBanner" class="ai-status-banner off"><strong>AI 增强未启用</strong><span>填写 API 地址和 Key 并开启开关。</span></div>
+          <p class="resume-privacy">你的 API Key 仅以掩码显示，不会回传到页面。调用会产生服务商费用；AI 生成内容和岗位建议可能出错，投递前请核实岗位链接、截止日期与个人信息。</p>
+          <label class="field"><span>启用 AI 增强</span><label class="switch"><input type="checkbox" id="llmEnabled"><span class="switch-track"></span></label></label>
+          <label class="field"><span>AI 服务商</span><select id="llmProvider"><option value="custom">自定义</option><option value="deepseek">DeepSeek</option><option value="doubao">豆包（火山方舟）</option><option value="openai">OpenAI</option><option value="kimi">Kimi（月之暗面）</option><option value="qwen">通义千问</option><option value="zhipu">智谱 GLM</option></select><small class="muted">选择后自动填入 API 地址与推荐模型，可再手动修改。</small></label>
+          <label class="field"><span>API 地址</span><input id="llmBase" type="text" placeholder="https://api.deepseek.com/v1"><small class="muted">推荐：<code>https://api.deepseek.com/v1</code>（DeepSeek 官方）或你的中转站地址，以 <code>/v1</code> 结尾</small></label>
+          <label class="field"><span>API Key</span><div class="flex" style="gap:8px"><input id="llmKey" type="password" placeholder="sk-..." style="flex:1"><span id="llmKeyStatus" class="muted">未设置</span></div><small class="muted">留空 = 保留已保存的 Key；粘贴新 Key 则替换。</small></label>
+          <label class="field"><span>模型名称</span><div class="flex" style="gap:8px"><input id="llmModel" list="llmModelOptions" type="text" placeholder="deepseek-chat" style="flex:1"><button class="btn btn-sm" id="detectModels" type="button">自动识别模型</button></div><datalist id="llmModelOptions"></datalist></label>
+          <div id="llmTestStatus" class="muted" role="status" aria-live="polite">尚未测试连接。保存后建议先测试一次。</div>
+          <div class="privacy-block">
+            <strong>填表插件</strong>
+            <p class="muted">「AI 填网申」浏览器插件凭此令牌读取你的档案，在任意企业网申页面自动填表。令牌仅本人可见，泄露可随时轮换。</p>
+            <div class="flex" style="gap:8px;flex-wrap:wrap">
+              <input id="extTokenBox" type="text" readonly placeholder="点击「获取插件令牌」" style="flex:1;min-width:220px;padding:6px 10px;border:1px solid var(--border-strong);border-radius:6px;font-size:12px">
+              <button class="btn btn-sm" id="getExtToken" type="button">获取令牌</button>
+              <button class="btn btn-sm" id="copyExtToken" type="button">复制</button>
+              <button class="btn btn-sm" id="rotateExtToken" type="button" style="color:var(--danger)">轮换（使旧令牌失效）</button>
+            </div>
+            <p class="muted text-sm mt-8">安装方法：下载 <code>tools/autofill-extension</code> 目录 → Chrome <code>chrome://extensions</code> → 开启开发者模式 → 加载已解压的扩展程序 → 在扩展弹窗填本服务地址 + 令牌。</p>
+          </div>
+          <div class="privacy-block">
+            <strong>隐私与数据</strong>
+            <p class="muted">你的简历、档案、岗位与对话只保存在本服务器。可随时导出全部数据，或注销账号彻底删除。</p>
+            <div class="flex" style="gap:8px">
+              <button class="btn btn-sm" id="exportMyData" type="button">导出我的数据</button>
+              <button class="btn btn-sm" id="deleteMyAccount" type="button" style="color:var(--danger)">注销账号</button>
+            </div>
+          </div>
+          <div class="modal-actions">
+            <button class="btn" data-close="settingsModal">取消</button>
+            <button class="btn" id="systemDiagnose" type="button">系统体检</button>
+            <button class="btn" id="testSettings">测试 AI 连接</button>
+            <button class="btn btn-primary" id="saveSettings">保存并验证设置</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay" id="addJobModal">
+      <div class="modal modal-wide">
+        <div class="modal-head">
+          <strong>录入岗位</strong>
+          <button class="icon-btn modal-close" data-close="addJobModal" aria-label="关闭">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12"></path><path d="M18 6L6 18"></path></svg>
+          </button>
+        </div>
+        <div class="modal-body form-grid">
+          <label class="field"><span>岗位名称 *</span><input id="jobTitle" type="text" placeholder="AI游戏策划（校招）"></label>
+          <label class="field"><span>公司 *</span><input id="jobCompany" type="text" placeholder="示例科技"></label>
+          <label class="field"><span>城市</span><input id="jobCity" type="text" placeholder="杭州"></label>
+          <label class="field"><span>招聘类型</span><select id="jobType"><option>校招</option><option>实习</option><option>管培生</option><option>未知</option></select></label>
+          <label class="field"><span>薪资参考</span><input id="jobSalary" type="text" placeholder="15K-25K·14薪"></label>
+          <label class="field"><span>截止日期</span><input id="jobDeadline" type="date"></label>
+          <label class="field field-full"><span>岗位标签（逗号分隔）</span><input id="jobTags" type="text" placeholder="AI游戏策划, LLM, 秋招"></label>
+          <label class="field field-full"><span>岗位链接</span><input id="jobUrl" type="text" placeholder="https://..."></label>
+          <label class="field field-full"><span>岗位描述</span><textarea id="jobDesc" rows="4" placeholder="粘贴或填写岗位职责…"></textarea></label>
+          <label class="field field-full"><span>任职要求（每行一条）</span><textarea id="jobReqs" rows="4" placeholder="应届生优先&#10;熟悉AI工具链"></textarea></label>
+          <div class="modal-actions field-full">
+            <button class="btn" data-close="addJobModal">取消</button>
+            <button class="btn btn-primary" id="saveJob">保存并评估</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay" id="upgradeModal">
+      <div class="modal">
+        <div class="modal-head">
+          <strong>游客转正注册</strong>
+          <button class="icon-btn modal-close" data-close="upgradeModal" aria-label="关闭">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12"></path><path d="M18 6L6 18"></path></svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p class="muted">注册后你的档案、申请记录、简历与对话都会保留在同一账号下。</p>
+          <label class="field"><span>用户名</span><input id="upgUsername" type="text" autocomplete="username"></label>
+          <label class="field"><span>邮箱（选填）</span><input id="upgEmail" type="email" autocomplete="email"></label>
+          <label class="field"><span>密码</span><input id="upgPassword" type="password" autocomplete="new-password" placeholder="至少 6 位"></label>
+          <div class="modal-actions">
+            <button class="btn" data-close="upgradeModal">取消</button>
+            <button class="btn btn-primary" id="upgradeBtn">转正并保留数据</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay" id="onboardingModal">
+      <div class="modal onboarding-modal">
+        <div class="modal-head"><strong>先告诉我你的求职偏好</strong><button class="icon-btn" id="onboardingSkip" aria-label="稍后填写">×</button></div>
+        <div class="modal-body">
+          <p class="muted">回答 4 个问题后，我会每天从真实岗位来源中为你挑选 2 个最匹配的岗位。</p>
+          <label class="field"><span>1. 想从事的方向 *</span><input id="onboardRole" placeholder="例如：AI 产品运营、游戏策划、模型评测"></label>
+          <label class="field"><span>2. 你的专业 *</span><input id="onboardMajor" placeholder="例如：计算机科学与技术、新闻传播学"></label>
+          <label class="field"><span>3. 想去发展的地方（最多 3 个） *</span><input id="onboardCities" placeholder="例如：上海、北京、杭州"></label>
+          <label class="field"><span>4. 期望工资 *</span><input id="onboardSalary" placeholder="例如：10K-15K / 月薪不低于 12K"></label>
+          <div class="modal-actions"><button class="btn btn-ghost" id="onboardingLater">稍后填写</button><button class="btn btn-primary" id="onboardingSave">保存并开始推荐</button></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast-wrap" id="toasts"></div>
+  </div>
+
+  <div id="tourRoot"></div>
+
+  <script src="/js/app.js"></script>
+  <script src="/js/resume-editor.js"></script>
+</body>
+</html>
